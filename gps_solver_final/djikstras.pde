@@ -1,41 +1,49 @@
-ArrayList<PVector> dijkstra() {
-  int[][] dist = new int[maze.cols][maze.rows];
-  PVector[][] prev = new PVector[maze.cols][maze.rows];
-  boolean[][] visited = new boolean[maze.cols][maze.rows];
+void drawPath() {
+  fill(0, 0, 255);
+  for (int i = 0; i <= step; i++) {
+    PVector p = path.get(i);
+    square(p.x * maze.cellSize, p.y * maze.cellSize, maze.cellSize);
+  }
+}
 
+ArrayList<PVector> dijkstra() {
   for (int i = 0; i < maze.cols; i++) {
     for (int j = 0; j < maze.rows; j++) {
-      dist[i][j] = Integer.MAX_VALUE;
-      visited[i][j] = false;
+      maze.dist[i][j] = Integer.MAX_VALUE;
+      //maze.visited[i][j] = false;
     }
   }
-  dist[(int) maze.start.x][(int) maze.start.y] = 0;
+  maze.dist[(int) maze.start.x][(int) maze.start.y] = 0;
 
   while (true) {
-    PVector u = minDistance(dist, visited);
+    PVector u = minDistance(maze.dist, maze.visited);
     if (u == null || u.equals(maze.end)) break;
 
     int ux = (int) u.x;
     int uy = (int) u.y;
-    visited[ux][uy] = true;
+    maze.visited[ux][uy] = true;
 
     for (PVector neighbor : getNeighbors(u)) {
       int nx = (int) neighbor.x;
       int ny = (int) neighbor.y;
 
-      if (visited[nx][ny]) continue;
+      // Add bounds check to prevent IndexOutOfBoundsException
+      if (nx < 0 || nx >= maze.cols || ny < 0 || ny >= maze.rows) continue;
 
-      int alt = dist[ux][uy] + 1;
-      if (alt < dist[nx][ny]) {
-        dist[nx][ny] = alt;
-        prev[nx][ny] = u;
+      if (maze.visited[nx][ny]) continue;
+
+      int alt = maze.dist[ux][uy] + 1;
+      if (alt < maze.dist[nx][ny]) {
+        maze.dist[nx][ny] = alt;
+        maze.prev[nx][ny] = u;
       }
     }
     redraw(); // Redraw the canvas after each step
   }
 
-  return reconstructPath(prev);
+  return reconstructPath(maze.prev);
 }
+
 
 PVector minDistance(int[][] dist, boolean[][] visited) {
   int min = Integer.MAX_VALUE;
@@ -63,6 +71,7 @@ ArrayList<PVector> getNeighbors(PVector u) {
   return neighbors;
 }
 
+
 boolean isValid(int x, int y) {
   return x >= 0 && x < maze.cols && y >= 0 && y < maze.rows && maze.grid[x][y].state == 0;
 }
@@ -84,13 +93,4 @@ ArrayList<PVector> reconstructPath(PVector[][] prev) {
   }
 
   return reversedPath;
-}
-
-void drawPath() {
-  fill(0, 0, 255);
-  for (int i = 0; i <= step; i++) {
-    PVector p = path.get(i);
-    square(p.x * maze.cellSize, p.y * maze.cellSize, maze.cellSize);
-  }
-  println("Solved!");
 }

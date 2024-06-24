@@ -10,7 +10,7 @@
 
 import g4p_controls.*;
 maze maze;
-int step = 0;
+int step = 1;
 ArrayList<PVector> path;
 boolean solve = false;
 
@@ -32,7 +32,7 @@ void draw() {
     path = dijkstra();
 
     drawPath();
-    if (step < path.size() - 1) {
+    if (step < path.size()-1) {
       step++;
     }
   }
